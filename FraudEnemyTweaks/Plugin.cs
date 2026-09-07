@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace FraudEnemyTweaks
 {
-    [BepInPlugin("com.mel33.fraudenemytweaks", "FraudEnemyTweaks", "1.0.0")]
+    [BepInPlugin("com.mel33.fraudenemytweaks", "FraudEnemyTweaks", "1.1.0")]
     public class Plugin : BaseUnityPlugin
     {
         internal static ManualLogSource Log;
@@ -114,14 +114,12 @@ namespace FraudEnemyTweaks
         }
     }
 
-
     [HarmonyPatch(typeof(MirrorReaper), nameof(MirrorReaper.ProjectileBarrage))]
     public class MirrorReaperCooldownPatch
     {
         private static float lastProjectileBarrageTime;
 
-        [HarmonyPrefix]
-        public static bool ProjectileBarragePrefix(MirrorReaper __instance)
+        public static bool Prefix(MirrorReaper __instance)
         {
             float time = Time.time;
             if (__instance.difficulty == 0 && time - lastProjectileBarrageTime < 16f)
@@ -145,6 +143,18 @@ namespace FraudEnemyTweaks
                 return false;
             }
             lastProjectileBarrageTime = time;
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(Deathcatcher), nameof(Deathcatcher.EnemyDeath))]
+    public static class DeathcatcherEnemyDeathPatch
+    {
+        public static bool Prefix(EnemyIdentifier eid)
+        {
+            if (eid != null && eid.GetComponent<Stalker>() != null)
+                return false;
+
             return true;
         }
     }
